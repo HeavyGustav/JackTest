@@ -45,9 +45,14 @@ floor.rotation.x = Math.PI / 2;
 scene.add(floor);
 
 // LIGHTING UNIFORMS
-var lightColor = new THREE.Color(0,1,1);
+var lightColor = new THREE.Color(1,1,1);
 var ambientColor = new THREE.Color(0.4,0.4,0.4);
 var lightPosition = new THREE.Vector3(70,100,70);
+
+var kAmbient = 0.4;
+var kDiffuse = 0.8;
+var kSpecular = 0.8;
+var shininess = 10.0;
 
 // MATERIALS
 var defaultMaterial = new THREE.MeshLambertMaterial();
@@ -57,6 +62,10 @@ var armadilloMaterial = new THREE.ShaderMaterial({
      lightColor : {type : 'c', value: lightColor},
      ambientColor : {type : 'c', value: ambientColor},
      lightPosition : {type: 'v3', value: lightPosition},
+     kAmbient : {type:'f', value: kAmbient},
+     kDiffuse: {type:'f', value: kAmbient},
+     kSpecular: {type:'f', value: kSpecular},
+     shininess: {type:'f', value: shininess}
    },
 });
 
@@ -65,14 +74,34 @@ var gouraudMaterial = new THREE.ShaderMaterial({
      lightColor : {type : 'c', value: lightColor},
      ambientColor : {type : 'c', value: ambientColor},
      lightPosition : {type: 'v3', value: lightPosition},
+     kAmbient : {type:'f', value: kAmbient},
+     kDiffuse: {type:'f', value: kAmbient},
+     kSpecular: {type:'f', value: kSpecular},
+     shininess: {type:'f', value: shininess}
    },
 });
+
 
 var phongMaterial = new THREE.ShaderMaterial({
    uniforms: {
      lightColor : {type : 'c', value: lightColor},
      ambientColor : {type : 'c', value: ambientColor},
      lightPosition : {type: 'v3', value: lightPosition},
+     kAmbient : {type:'f', value: kAmbient},
+     kDiffuse: {type:'f', value: kAmbient},
+     kSpecular: {type:'f', value: kSpecular},
+     shininess: {type:'f', value: shininess}
+   },
+});
+var blinnMaterial = new THREE.ShaderMaterial({
+   uniforms: {
+     lightColor : {type : 'c', value: lightColor},
+     ambientColor : {type : 'c', value: ambientColor},
+     lightPosition : {type: 'v3', value: lightPosition},
+     kAmbient : {type:'f', value: kAmbient},
+     kDiffuse: {type:'f', value: kAmbient},
+     kSpecular: {type:'f', value: kSpecular},
+     shininess: {type:'f', value: shininess}
    },
 });
 // LOAD SHADERS
@@ -83,6 +112,8 @@ var shaderFiles = [
   'glsl/gouraud.fs.glsl', 
   'glsl/phong.vs.glsl',
   'glsl/phong.fs.glsl',
+  'glsl/blinn.vs.glsl',
+  'glsl/blinn.fs.glsl',
 ];
 
 new THREE.SourceLoader().load(shaderFiles, function(shaders) {
@@ -97,6 +128,10 @@ new THREE.SourceLoader().load(shaderFiles, function(shaders) {
   phongMaterial.vertexShader = shaders['glsl/phong.vs.glsl'];
   phongMaterial.fragmentShader = shaders['glsl/phong.fs.glsl'];
   phongMaterial.needsUpdate = true;
+
+  blinnMaterial.vertexShader = shaders['glsl/blinn.vs.glsl'];
+  blinnMaterial.fragmentShader = shaders['glsl/blinn.fs.glsl'];
+  blinnMaterial.needsUpdate = true;
 })
 
 
@@ -147,7 +182,7 @@ gem_phong.position.set(-1, 1, -1);
 scene.add(gem_phong);
 gem_phong.parent = floor;
 
-var gem_phong_blinn = new THREE.Mesh(sphere, defaultMaterial);
+var gem_phong_blinn = new THREE.Mesh(sphere, blinnMaterial);
 gem_phong_blinn.position.set(1, 1, -1);
 scene.add(gem_phong_blinn);
 gem_phong_blinn.parent = floor;
@@ -159,8 +194,38 @@ gem_toon.parent = floor;
 
 // SETUP UPDATE CALL-BACK
 var keyboard = new THREEx.KeyboardState();
+function onKeyDown(event)
+{
+ if(keyboard.eventMatches(event,"1"))
+  {
+    alert("1");
+    armadilloMaterial.vertexShader = shaders['glsl/gouraud.vs.glsl'];
+    armadilloMaterial.fragmentShader = shaders['glsl/gouraud.fs.glsl'];
+    armadilloMaterial.vertexShader.needsUpdate = true;
+    armadilloMaterial.fragmentShader.needsUpdate = true;
+    armadilloMaterial.needsUpdate = true;
+    render();
+  }
+  else if(keyboard.eventMatches(event,"2"))
+  {
+    alert("2");
+  }
+  else if(keyboard.eventMatches(event,"3"))
+  {
+    alert("3");
+    loadOBJ('obj/armadillo.obj', blinnMaterial, 3, 0,3,-2, 0,Math.PI,0);
+    render();
+  }
+  else if(keyboard.eventMatches(event,"4"))
+  {
+  
+  }
+  else{
+  }  
+};
+keyboard.domElement.addEventListener('keydown', onKeyDown );
 var render = function() {
- // tip: change armadillo shading here according to keyboard
+   
 
  requestAnimationFrame(render);
  renderer.render(scene, camera);
