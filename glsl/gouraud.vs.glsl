@@ -1,7 +1,6 @@
 uniform vec3 lightColor;
 uniform vec3 ambientColor;
 uniform vec3 lightPosition;
-
 uniform float kAmbient;
 uniform float kDiffuse;
 uniform float kSpecular;
@@ -23,7 +22,7 @@ void main()
  
     float diffuse = max(dot(modelViewNormal, lightVector), 0.1);
   
-    V_Color = vec4(lightColor,1.0) * diffuse;
+    V_Color = vec4(lightColor,1.0) * diffuse * vec4(ambientColor,1.0) * kAmbient * kSpecular * shininess;
  
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
 }

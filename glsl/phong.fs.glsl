@@ -1,20 +1,35 @@
-precision mediump float;       // Set the default precision to medium. We don't need as high of a
-                               // precision in the fragment shader.
-uniform vec3 lightPosition;       // The position of the light in eye space.
- 
-varying vec3 v_Position;       // Interpolated position for this fragment.
-varying vec4 v_Color;          // This is the color from the vertex shader interpolated across the
-                               // triangle per fragment.
-varying vec3 v_Normal;         // Interpolated normal for this fragment.
- 
-// The entry point for our fragment shader.
-void main()
-{
-    float distance = length(lightPosition - v_Position);
- 
-    vec3 lightVector = normalize(lightPosition - v_Position);
- 
-    float diffuse = max(dot(v_Normal, lightVector), 0.1);
-  
-    gl_FragColor = v_Color * diffuse;
+
+varying vec4 V_ViewPosition;
+varying vec4 V_Normal_VCS;
+uniform vec3 lightColor;
+uniform vec3 ambientColor;
+uniform vec3 lightPosition;
+uniform float kAmbient;
+uniform float kDiffuse;
+uniform float kSpecular;
+uniform float shininess;
+
+
+void main() {
+
+    vec3 n = vec3(V_Normal_VCS);
+	vec3 viewVector  = vec3(V_ViewPosition);
+	vec3 viewDirection = normalize(-viewVector);
+	vec3 lightDirec = vec3(viewMatrix * vec4(lightPosition, 0.0));
+	vec3 reflectDirection = reflect(-lightDirec, n);
+
+	float specularref = 0.0;
+	float angle = max(dot(lightDirec,n), 0.0);
+	
+if(angle>0.0)
+	{
+		float specAngle = max(dot(reflectDirection, viewDirection), 0.0);
+		specularref = pow(specAngle, shininess);
+	}
+
+	vec3 reflectColour = kSpecular * specularref * lightColor + kDiffuse * angle * lightColor + kAmbient * ambientColor;
+
+
+	gl_FragColor = vec4(reflectColour, 1.0); 
 }
+

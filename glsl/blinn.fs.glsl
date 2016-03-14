@@ -24,7 +24,7 @@ void main() {
     }
 
 
-	vec3 reflectColour = kSpecular*specular * lightColor + kDiffuse*lam * lightColor + kAmbient*ambientColor;
+	vec3 reflectColour = kSpecular* specular * lightColor + kDiffuse* lam * lightColor + kAmbient * ambientColor ;
 	gl_FragColor = vec4(reflectColour, 1.0);
 	
 	

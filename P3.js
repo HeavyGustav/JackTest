@@ -168,7 +168,7 @@ function loadOBJ(file, material, scale, xOff, yOff, zOff, xRot, yRot, zRot) {
   }, onProgress, onError);
 }
 
-loadOBJ('obj/armadillo.obj', armadilloMaterial, 3, 0,3,-2, 0,Math.PI,0);
+loadOBJ('obj/armadillo.obj', gouraudMaterial, 3, 0,3,-2, 0,Math.PI,0);
 
 // CREATE SPHERES
 var sphere = new THREE.SphereGeometry(1, 32, 32);
@@ -198,23 +198,12 @@ function onKeyDown(event)
 {
  if(keyboard.eventMatches(event,"1"))
   {
-    alert("1");
-    armadilloMaterial.vertexShader = shaders['glsl/gouraud.vs.glsl'];
-    armadilloMaterial.fragmentShader = shaders['glsl/gouraud.fs.glsl'];
-    armadilloMaterial.vertexShader.needsUpdate = true;
-    armadilloMaterial.fragmentShader.needsUpdate = true;
-    armadilloMaterial.needsUpdate = true;
-    render();
   }
   else if(keyboard.eventMatches(event,"2"))
   {
-    alert("2");
   }
   else if(keyboard.eventMatches(event,"3"))
   {
-    alert("3");
-    loadOBJ('obj/armadillo.obj', blinnMaterial, 3, 0,3,-2, 0,Math.PI,0);
-    render();
   }
   else if(keyboard.eventMatches(event,"4"))
   {
@@ -224,6 +213,7 @@ function onKeyDown(event)
   }  
 };
 keyboard.domElement.addEventListener('keydown', onKeyDown );
+
 var render = function() {
    
 
