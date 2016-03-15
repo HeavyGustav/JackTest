@@ -54,6 +54,10 @@ var kDiffuse = 0.8;
 var kSpecular = 0.8;
 var shininess = 10.0;
 
+// ctw color setting
+var ctw_c = new THREE.Color(0.0,0.0,0.7);
+var ctw_w = new THREE.Color(0.8,0.0,0.0); 
+
 // MATERIALS
 var defaultMaterial = new THREE.MeshLambertMaterial();
 
@@ -63,7 +67,7 @@ var armadilloMaterial = new THREE.ShaderMaterial({
      ambientColor : {type : 'c', value: ambientColor},
      lightPosition : {type: 'v3', value: lightPosition},
      kAmbient : {type:'f', value: kAmbient},
-     kDiffuse: {type:'f', value: kAmbient},
+     kDiffuse: {type:'f', value: kDiffuse},
      kSpecular: {type:'f', value: kSpecular},
      shininess: {type:'f', value: shininess}
    },
@@ -75,7 +79,7 @@ var gouraudMaterial = new THREE.ShaderMaterial({
      ambientColor : {type : 'c', value: ambientColor},
      lightPosition : {type: 'v3', value: lightPosition},
      kAmbient : {type:'f', value: kAmbient},
-     kDiffuse: {type:'f', value: kAmbient},
+     kDiffuse: {type:'f', value: kDiffuse},
      kSpecular: {type:'f', value: kSpecular},
      shininess: {type:'f', value: shininess}
    },
@@ -88,7 +92,7 @@ var phongMaterial = new THREE.ShaderMaterial({
      ambientColor : {type : 'c', value: ambientColor},
      lightPosition : {type: 'v3', value: lightPosition},
      kAmbient : {type:'f', value: kAmbient},
-     kDiffuse: {type:'f', value: kAmbient},
+     kDiffuse: {type:'f', value: kDiffuse},
      kSpecular: {type:'f', value: kSpecular},
      shininess: {type:'f', value: shininess}
    },
@@ -99,9 +103,23 @@ var blinnMaterial = new THREE.ShaderMaterial({
      ambientColor : {type : 'c', value: ambientColor},
      lightPosition : {type: 'v3', value: lightPosition},
      kAmbient : {type:'f', value: kAmbient},
-     kDiffuse: {type:'f', value: kAmbient},
+     kDiffuse: {type:'f', value: kDiffuse},
      kSpecular: {type:'f', value: kSpecular},
      shininess: {type:'f', value: shininess}
+   },
+});
+
+var ctwMaterial = new THREE.ShaderMaterial({
+   uniforms: {
+     lightColor : {type : 'c', value: lightColor},
+     ambientColor : {type : 'c', value: ambientColor},
+     lightPosition : {type: 'v3', value: lightPosition},
+     kAmbient : {type:'f', value: kAmbient},
+     kDiffuse: {type:'f', value: kDiffuse},
+     kSpecular: {type:'f', value: kSpecular},
+     shininess: {type:'f', value: shininess},
+     ctw_c: {type : 'c', value: ctw_c},
+     ctw_w: {type : 'c', value: ctw_w}
    },
 });
 // LOAD SHADERS
@@ -114,6 +132,8 @@ var shaderFiles = [
   'glsl/phong.fs.glsl',
   'glsl/blinn.vs.glsl',
   'glsl/blinn.fs.glsl',
+  'glsl/ctw.vs.glsl',
+  'glsl/ctw.fs.glsl'
 ];
 
 new THREE.SourceLoader().load(shaderFiles, function(shaders) {
@@ -132,6 +152,10 @@ new THREE.SourceLoader().load(shaderFiles, function(shaders) {
   blinnMaterial.vertexShader = shaders['glsl/blinn.vs.glsl'];
   blinnMaterial.fragmentShader = shaders['glsl/blinn.fs.glsl'];
   blinnMaterial.needsUpdate = true;
+
+  ctwMaterial.vertexShader = shaders['glsl/ctw.vs.glsl'];
+  ctwMaterial.fragmentShader = shaders['glsl/ctw.fs.glsl'];
+  ctwMaterial.needsUpdate = true;
 })
 
 
@@ -168,7 +192,7 @@ function loadOBJ(file, material, scale, xOff, yOff, zOff, xRot, yRot, zRot) {
   }, onProgress, onError);
 }
 
-loadOBJ('obj/armadillo.obj', gouraudMaterial, 3, 0,3,-2, 0,Math.PI,0);
+loadOBJ('obj/armadillo.obj', armadilloMaterial, 3, 0,3,-2, 0,Math.PI,0);
 
 // CREATE SPHERES
 var sphere = new THREE.SphereGeometry(1, 32, 32);
@@ -187,7 +211,7 @@ gem_phong_blinn.position.set(1, 1, -1);
 scene.add(gem_phong_blinn);
 gem_phong_blinn.parent = floor;
 
-var gem_toon = new THREE.Mesh(sphere, defaultMaterial);
+var gem_toon = new THREE.Mesh(sphere, ctwMaterial);
 gem_toon.position.set(3, 1, -1);
 scene.add(gem_toon);
 gem_toon.parent = floor;
@@ -198,16 +222,31 @@ function onKeyDown(event)
 {
  if(keyboard.eventMatches(event,"1"))
   {
+    alert("Gouraud Shading");
+    armadilloMaterial.vertexShader = gouraudMaterial.vertexShader;
+    armadilloMaterial.fragmentShader = gouraudMaterial.fragmentShader;
+    armadilloMaterial.needsUpdate = true;
   }
   else if(keyboard.eventMatches(event,"2"))
   {
+    alert("Phong Shading");
+    armadilloMaterial.vertexShader = phongMaterial.vertexShader;
+    armadilloMaterial.fragmentShader = phongMaterial.fragmentShader;
+    armadilloMaterial.needsUpdate = true;
   }
   else if(keyboard.eventMatches(event,"3"))
   {
+    alert("Blinn Shading");
+    armadilloMaterial.vertexShader = blinnMaterial.vertexShader;
+    armadilloMaterial.fragmentShader = blinnMaterial.fragmentShader;
+    armadilloMaterial.needsUpdate = true;
   }
   else if(keyboard.eventMatches(event,"4"))
   {
-  
+    alert("Cool-to-warm Shading");
+    armadilloMaterial.vertexShader = ctwMaterial.vertexShader;
+    armadilloMaterial.fragmentShader = ctwMaterial.fragmentShader;
+    armadilloMaterial.needsUpdate = true;
   }
   else{
   }  

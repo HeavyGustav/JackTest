@@ -1,3 +1,4 @@
+varying vec4 V_Color;
 uniform vec3 lightColor;
 uniform vec3 ambientColor;
 uniform vec3 lightPosition;
@@ -6,23 +7,26 @@ uniform float kDiffuse;
 uniform float kSpecular;
 uniform float shininess;
 
-varying vec4 V_Color;
- 
- 
-// The entry point for our vertex shader.
-void main()
-{
-    vec3 modelViewVertex = vec3(modelViewMatrix * vec4(position,1.0));
- 
-    vec3 modelViewNormal = vec3(modelViewMatrix * vec4(normal, 0.0));
- 
-    float distance = length(lightPosition - modelViewVertex);
- 
-    vec3 lightVector = normalize(lightPosition - modelViewVertex);
- 
-    float diffuse = max(dot(modelViewNormal, lightVector), 0.1);
+void main() {
+
+  vec3 norm = normalize(normalMatrix * normal);
+  float angle = dot(norm, normalize(lightPosition));
   
-    V_Color = vec4(lightColor,1.0) * diffuse * vec4(ambientColor,1.0) * kAmbient * kSpecular * shininess;
+  if (angle<0.0){angle = 0.0;}
+
+  float specular = 0.0;
+
+  vec3 light = vec3(viewMatrix * vec4(normalize(lightPosition),0.0));
+  vec3 view = normalize(vec3(modelViewMatrix * vec4(position, 1.0)));
+  vec3 reflect = normalize(reflect(light,norm));
+  
+  if(angle != 0.0){
+    float s = dot(reflect,view);
+    if(s<0.0){s = 0.0;}
+    specular = pow(s,shininess);
+  }
  
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+  V_Color = vec4(angle * kDiffuse * lightColor + kAmbient * ambientColor + kSpecular * specular * lightColor,1.0);
+  gl_Position = projectionMatrix *  modelViewMatrix * vec4(position, 1.0);
+
 }
