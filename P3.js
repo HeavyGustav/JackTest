@@ -55,8 +55,8 @@ var kSpecular = 0.8;
 var shininess = 10.0;
 
 // ctw color setting
-var ctw_c = new THREE.Color(0.0,0.0,0.7);
-var ctw_w = new THREE.Color(0.8,0.0,0.0); 
+var ctw_c = new THREE.Color(0.0,0.1,0.7);
+var ctw_w = new THREE.Color(0.6,0.1,0.0); 
 
 // MATERIALS
 var defaultMaterial = new THREE.MeshLambertMaterial();
@@ -84,6 +84,17 @@ var gouraudMaterial = new THREE.ShaderMaterial({
      shininess: {type:'f', value: shininess}
    },
 });
+var gouraud_a_Material = new THREE.ShaderMaterial({
+   uniforms: {
+     lightColor : {type : 'c', value: lightColor},
+     ambientColor : {type : 'c', value: ambientColor},
+     lightPosition : {type: 'v3', value: lightPosition},
+     kAmbient : {type:'f', value: kAmbient},
+     kDiffuse: {type:'f', value: kDiffuse},
+     kSpecular: {type:'f', value: kSpecular},
+     shininess: {type:'f', value: shininess}
+   },
+});
 
 
 var phongMaterial = new THREE.ShaderMaterial({
@@ -97,7 +108,30 @@ var phongMaterial = new THREE.ShaderMaterial({
      shininess: {type:'f', value: shininess}
    },
 });
+var phong_a_Material = new THREE.ShaderMaterial({
+   uniforms: {
+     lightColor : {type : 'c', value: lightColor},
+     ambientColor : {type : 'c', value: ambientColor},
+     lightPosition : {type: 'v3', value: lightPosition},
+     kAmbient : {type:'f', value: kAmbient},
+     kDiffuse: {type:'f', value: kDiffuse},
+     kSpecular: {type:'f', value: kSpecular},
+     shininess: {type:'f', value: shininess}
+   },
+});
 var blinnMaterial = new THREE.ShaderMaterial({
+   uniforms: {
+     lightColor : {type : 'c', value: lightColor},
+     ambientColor : {type : 'c', value: ambientColor},
+     lightPosition : {type: 'v3', value: lightPosition},
+     kAmbient : {type:'f', value: kAmbient},
+     kDiffuse: {type:'f', value: kDiffuse},
+     kSpecular: {type:'f', value: kSpecular},
+     shininess: {type:'f', value: shininess}
+   },
+});
+
+var blinn_a_Material = new THREE.ShaderMaterial({
    uniforms: {
      lightColor : {type : 'c', value: lightColor},
      ambientColor : {type : 'c', value: ambientColor},
@@ -122,6 +156,20 @@ var ctwMaterial = new THREE.ShaderMaterial({
      ctw_w: {type : 'c', value: ctw_w}
    },
 });
+
+var ctw_a_Material = new THREE.ShaderMaterial({
+   uniforms: {
+     lightColor : {type : 'c', value: lightColor},
+     ambientColor : {type : 'c', value: ambientColor},
+     lightPosition : {type: 'v3', value: lightPosition},
+     kAmbient : {type:'f', value: kAmbient},
+     kDiffuse: {type:'f', value: kDiffuse},
+     kSpecular: {type:'f', value: kSpecular},
+     shininess: {type:'f', value: shininess},
+     ctw_c: {type : 'c', value: ctw_c},
+     ctw_w: {type : 'c', value: ctw_w}
+   },
+});
 // LOAD SHADERS
 var shaderFiles = [
   'glsl/example.vs.glsl',
@@ -133,7 +181,15 @@ var shaderFiles = [
   'glsl/blinn.vs.glsl',
   'glsl/blinn.fs.glsl',
   'glsl/ctw.vs.glsl',
-  'glsl/ctw.fs.glsl'
+  'glsl/ctw.fs.glsl',
+  'glsl/gouraud_a.vs.glsl',
+  'glsl/gouraud_a.fs.glsl',
+  'glsl/phong_a.vs.glsl',
+  'glsl/phong_a.fs.glsl',
+  'glsl/blinn_a.vs.glsl',
+  'glsl/blinn_a.fs.glsl',
+  'glsl/ctw_a.vs.glsl',
+  'glsl/ctw_a.fs.glsl',
 ];
 
 new THREE.SourceLoader().load(shaderFiles, function(shaders) {
@@ -145,17 +201,33 @@ new THREE.SourceLoader().load(shaderFiles, function(shaders) {
   gouraudMaterial.fragmentShader = shaders['glsl/gouraud.fs.glsl'];
   gouraudMaterial.needsUpdate = true;
 
+  gouraud_a_Material.vertexShader = shaders['glsl/gouraud_a.vs.glsl'];
+  gouraud_a_Material.fragmentShader = shaders['glsl/gouraud_a.fs.glsl'];
+  gouraud_a_Material.needsUpdate = true;
+
   phongMaterial.vertexShader = shaders['glsl/phong.vs.glsl'];
   phongMaterial.fragmentShader = shaders['glsl/phong.fs.glsl'];
   phongMaterial.needsUpdate = true;
 
+  phong_a_Material.vertexShader = shaders['glsl/phong_a.vs.glsl'];
+  phong_a_Material.fragmentShader = shaders['glsl/phong_a.fs.glsl'];
+  phong_a_Material.needsUpdate = true;
+
   blinnMaterial.vertexShader = shaders['glsl/blinn.vs.glsl'];
   blinnMaterial.fragmentShader = shaders['glsl/blinn.fs.glsl'];
   blinnMaterial.needsUpdate = true;
+  
+  blinn_a_Material.vertexShader = shaders['glsl/blinn_a.vs.glsl'];
+  blinn_a_Material.fragmentShader = shaders['glsl/blinn_a.fs.glsl'];
+  blinn_a_Material.needsUpdate = true;
 
   ctwMaterial.vertexShader = shaders['glsl/ctw.vs.glsl'];
   ctwMaterial.fragmentShader = shaders['glsl/ctw.fs.glsl'];
   ctwMaterial.needsUpdate = true;
+
+  ctw_a_Material.vertexShader = shaders['glsl/ctw_a.vs.glsl'];
+  ctw_a_Material.fragmentShader = shaders['glsl/ctw_a.fs.glsl'];
+  ctw_a_Material.needsUpdate = true;
 })
 
 
@@ -223,29 +295,29 @@ function onKeyDown(event)
  if(keyboard.eventMatches(event,"1"))
   {
     alert("Gouraud Shading");
-    armadilloMaterial.vertexShader = gouraudMaterial.vertexShader;
-    armadilloMaterial.fragmentShader = gouraudMaterial.fragmentShader;
+    armadilloMaterial.vertexShader = gouraud_a_Material.vertexShader;
+    armadilloMaterial.fragmentShader = gouraud_a_Material.fragmentShader;
     armadilloMaterial.needsUpdate = true;
   }
   else if(keyboard.eventMatches(event,"2"))
   {
     alert("Phong Shading");
-    armadilloMaterial.vertexShader = phongMaterial.vertexShader;
-    armadilloMaterial.fragmentShader = phongMaterial.fragmentShader;
+    armadilloMaterial.vertexShader = phong_a_Material.vertexShader;
+    armadilloMaterial.fragmentShader = phong_a_Material.fragmentShader;
     armadilloMaterial.needsUpdate = true;
   }
   else if(keyboard.eventMatches(event,"3"))
   {
     alert("Blinn Shading");
-    armadilloMaterial.vertexShader = blinnMaterial.vertexShader;
-    armadilloMaterial.fragmentShader = blinnMaterial.fragmentShader;
+    armadilloMaterial.vertexShader = blinn_a_Material.vertexShader;
+    armadilloMaterial.fragmentShader = blinn_a_Material.fragmentShader;
     armadilloMaterial.needsUpdate = true;
   }
   else if(keyboard.eventMatches(event,"4"))
   {
     alert("Cool-to-warm Shading");
-    armadilloMaterial.vertexShader = ctwMaterial.vertexShader;
-    armadilloMaterial.fragmentShader = ctwMaterial.fragmentShader;
+    armadilloMaterial.vertexShader = ctw_a_Material.vertexShader;
+    armadilloMaterial.fragmentShader = ctw_a_Material.fragmentShader;
     armadilloMaterial.needsUpdate = true;
   }
   else{
